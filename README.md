@@ -237,6 +237,9 @@ function parseIngredients(message: string): string[] {
 - Advanced dietary filters and preferences
 - Multi-language support for names and recipes
 
+## Project Demonstration (Test my Project here)
+
+LINK :- https://ai-assignment-name-m-t0rp.bolt.host/
 ---
 
 **Note**: This implementation simulates the local LLM functionality with a sophisticated recipe matching algorithm. For production use with actual LLMs, integrate with frameworks like Ollama, Hugging Face Transformers, or OpenAI's API.
