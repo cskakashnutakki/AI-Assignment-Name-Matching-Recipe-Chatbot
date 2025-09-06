@@ -1,0 +1,133 @@
+import React, { useState, useMemo } from 'react';
+import { Search, User, Star } from 'lucide-react';
+import { calculateSimilarity } from '../utils/algorithms';
+import { SAMPLE_NAMES } from '../data/names';
+
+interface NameMatch {
+  name: string;
+  score: number;
+}
+
+
+export default function NameMatcher() {
+  const [inputName, setInputName] = useState('');
+  const [isSearching, setIsSearching] = useState(false);
+
+  const matches = useMemo(() => {
+    if (!inputName.trim()) return [];
+    
+    setIsSearching(true);
+    
+    const results = SAMPLE_NAMES
+      .map(name => ({
+        name,
+        score: calculateSimilarity(inputName, name)
+      }))
+      .filter(match => match.score > 0)
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 10);
+    
+    setTimeout(() => setIsSearching(false), 300);
+    return results;
+  }, [inputName]);
+
+  const bestMatch = matches[0];
+
+  return (
+    <div className="space-y-6">
+      <div className="text-center">
+        <h2 className="text-3xl font-bold text-gray-900 mb-2">Name Matching System</h2>
+        <p className="text-gray-600">Find similar names using advanced fuzzy matching algorithms</p>
+      </div>
+
+      <div className="bg-white rounded-xl shadow-lg p-6">
+        <div className="relative">
+          <Search className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
+          <input
+            type="text"
+            value={inputName}
+            onChange={(e) => setInputName(e.target.value)}
+            placeholder="Enter a name to find similar matches..."
+            className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-lg"
+          />
+        </div>
+      </div>
+
+      {inputName && (
+        <div className="space-y-4">
+          {bestMatch && (
+            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-200">
+              <div className="flex items-center mb-2">
+                <Star className="h-5 w-5 text-yellow-500 mr-2" />
+                <span className="font-semibold text-blue-900">Best Match</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center">
+                  <User className="h-6 w-6 text-blue-600 mr-3" />
+                  <span className="text-xl font-bold text-blue-900">{bestMatch.name}</span>
+                </div>
+                <div className="text-right">
+                  <div className="text-2xl font-bold text-blue-600">{bestMatch.score}%</div>
+                  <div className="text-sm text-blue-500">Similarity</div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          <div className="bg-white rounded-xl shadow-lg p-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+              <Search className="h-5 w-5 mr-2" />
+              All Matches ({matches.length})
+            </h3>
+            
+            {isSearching ? (
+              <div className="flex items-center justify-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                <span className="ml-2 text-gray-600">Searching for matches...</span>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {matches.map((match, index) => (
+                  <div
+                    key={`${match.name}-${index}`}
+                    className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 transition-colors duration-150"
+                  >
+                    <div className="flex items-center">
+                      <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-indigo-500 text-white rounded-full flex items-center justify-center text-sm font-semibold mr-3">
+                        {index + 1}
+                      </div>
+                      <div className="flex items-center">
+                        <User className="h-4 w-4 text-gray-500 mr-2" />
+                        <span className="font-medium text-gray-900">{match.name}</span>
+                      </div>
+                    </div>
+                    <div className="flex items-center">
+                      <div className="w-24 bg-gray-200 rounded-full h-2 mr-3">
+                        <div
+                          className="bg-gradient-to-r from-blue-500 to-indigo-500 h-2 rounded-full transition-all duration-500"
+                          style={{ width: `${match.score}%` }}
+                        />
+                      </div>
+                      <span className="text-sm font-semibold text-gray-700 w-12">{match.score}%</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {!inputName && (
+        <div className="bg-white rounded-xl shadow-lg p-8 text-center">
+          <User className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+          <h3 className="text-lg font-semibold text-gray-600 mb-2">Ready to Find Matches</h3>
+          <p className="text-gray-500">Type a name above to see similar matches with similarity scores</p>
+          <div className="mt-4 text-sm text-gray-400">
+            Try names like: Geetha, Aditi, Priya, Rahul, Ananya, Vikram
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
